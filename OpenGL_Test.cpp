@@ -10,18 +10,22 @@ using namespace std;
 
 int main()
 {
+	// Vars
+	const int SCREEN_WIDTH = 640;
+	const int SCREEN_HEIGHT = 480;
+
 	cout << "Hello bruh" << endl;
 
 	//Initialize SDL2
 	if (SDL_Init(SDL_INIT_VIDEO) != 0) {
-		cout << "Error init SDL2_Video: " << SDL_GetError() << endl;
+		logSDLError(cout, "Video_init");
 		return 1;
 	}
 
 	//Create window
 	SDL_Window* win = SDL_CreateWindow("OpenGL_Test", 100, 100, 640, 480, SDL_WINDOW_SHOWN);
 	if (win == nullptr) {
-		cout << "Error creating window: " << SDL_GetError() << endl;
+		logSDLError(cout, "Creating window");
 		SDL_Quit();
 		return 1;
 	}
@@ -30,7 +34,7 @@ int main()
 	SDL_Renderer* ren = SDL_CreateRenderer(win, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
 	if (ren == nullptr) {
 		SDL_DestroyWindow(win);
-		cout << "Error creating SDL2_Render: " << SDL_GetError() << endl;
+		logSDLError(cout, "SDL_Render");
 		SDL_Quit();
 		return 1;
 	}
@@ -44,7 +48,7 @@ int main()
 	if (bmp == nullptr) {
 		SDL_DestroyRenderer(ren);
 		SDL_DestroyWindow(win);
-		cout << "Error loading bitmap: " << SDL_GetError() << endl;
+		logSDLError(cout, "Bitmap load");
 		SDL_Quit();
 		return 1;
 	}
@@ -55,7 +59,7 @@ int main()
 	if (tex == nullptr) {
 		SDL_DestroyRenderer(ren);
 		SDL_DestroyWindow(win);
-		cout << "Error creating texture: " << SDL_GetError() << endl;
+		logSDLError(cout, "Texture creation");
 		SDL_Quit();
 		return 1;
 	}
@@ -73,4 +77,9 @@ int main()
 	SDL_Quit();
 
 	return 0;
+}
+
+// Error message logger/printer
+void logSDLError(ostream& os, const string& msg) {
+	os << msg << " error: " << SDL_GetError() << endl;
 }
