@@ -10,6 +10,7 @@ using namespace std;
 
 void logSDLError(ostream& os, const string& msg);
 SDL_Texture* loadTexture(const string& file, SDL_Renderer* ren);
+void renderTexture(SDL_Texture* tex, SDL_Renderer* ren, int x, int y);
 
 int main()
 {
@@ -42,42 +43,15 @@ int main()
 		return 1;
 	}
 
-	// Load image
-	/*char* basePath = SDL_GetBasePath();
-	string baseDir = basePath;
-	SDL_free(basePath);
-	string imagePath = baseDir + "Trollface.bmp";
-	SDL_Surface* bmp = SDL_LoadBMP(imagePath.c_str());
-	if (bmp == nullptr) {
-		SDL_DestroyRenderer(ren);
-		SDL_DestroyWindow(win);
-		logSDLError(cout, "Bitmap load");
-		SDL_Quit();
-		return 1;
-	}
-	*/
-
 	// Load image to texture
 	SDL_Texture* tex = loadTexture("Trollface.bmp", ren);
 
-	// Create texture to display the image
-	/*
-	SDL_Texture* tex = SDL_CreateTextureFromSurface(ren, bmp);
-	SDL_FreeSurface(bmp);
-	if (tex == nullptr) {
-		SDL_DestroyRenderer(ren);
-		SDL_DestroyWindow(win);
-		logSDLError(cout, "Texture creation");
-		SDL_Quit();
-		return 1;
-	}
-	*/
-
 	// Draw the texture
 	SDL_RenderClear(ren);
-	SDL_RenderCopy(ren, tex, NULL, NULL);
+	renderTexture(tex, ren, 0, 0);
 	SDL_RenderPresent(ren);
 	SDL_Delay(5000);
+	
 
 	// Clean up
 	SDL_DestroyTexture(tex);
@@ -113,4 +87,15 @@ SDL_Texture* loadTexture(const string& file, SDL_Renderer* ren) {
 		logSDLError(cout, "LoadBMP");
 	}
 	return texture;
+}
+
+// Texture renderer
+void renderTexture(SDL_Texture* tex, SDL_Renderer* ren, int x, int y) {
+	// Set destination rectangle position
+	SDL_Rect dst;
+	dst.x = x;
+	dst.y = y;
+	// Get width and height from texture
+	SDL_QueryTexture(tex, NULL, NULL, &dst.w, &dst.h);
+	SDL_RenderCopy(ren, tex, NULL, &dst);
 }
