@@ -45,13 +45,32 @@ int main()
 
 	// Load image to texture
 	SDL_Texture* tex = loadTexture("Trollface.bmp", ren);
-
-	// Draw the texture
-	SDL_RenderClear(ren);
-	renderTexture(tex, ren, 0, 0);
-	SDL_RenderPresent(ren);
-	SDL_Delay(5000);
 	
+	// Vars for main loop
+	SDL_Event e;
+	bool quit = false;
+	// Main loop
+	while (!quit) {
+		// Check if it's time to quit
+		while (SDL_PollEvent(&e)) {
+			// Window closed?
+			if (e.type == SDL_QUIT) {
+				quit = true;
+			}
+			// Key pressed?
+			if (e.type == SDL_KEYDOWN) {
+				quit = true;
+			}
+			// Mouse clicked?
+			if (e.type == SDL_MOUSEBUTTONDOWN) {
+				quit = true;
+			}
+		}
+		// Render
+		SDL_RenderClear(ren);
+		renderTexture(tex, ren, 0, 0);
+		SDL_RenderPresent(ren);
+	}
 
 	// Clean up
 	SDL_DestroyTexture(tex);
