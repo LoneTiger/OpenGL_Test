@@ -58,13 +58,13 @@ int main()
 				quit = true;
 			}
 			// Key pressed?
-			if (e.type == SDL_KEYDOWN) {
-				quit = true;
-			}
+			//if (e.type == SDL_KEYDOWN) {
+			//	quit = true;
+			//}
 			// Mouse clicked?
-			if (e.type == SDL_MOUSEBUTTONDOWN) {
-				quit = true;
-			}
+			//if (e.type == SDL_MOUSEBUTTONDOWN) {
+			//	quit = true;
+			//}
 		}
 		// Render
 		SDL_RenderClear(ren);
