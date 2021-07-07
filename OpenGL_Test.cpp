@@ -51,8 +51,11 @@ int main()
 	// no more render :(
 	// Time for OpenGL!! :D
 
-	SDL_GLContext context = SDL_GL_CreateContext(win);
-	gladLoadGLLoader((GLADloadproc)SDL_GL_GetProcAddress);
+	SDL_GLContext context = SDL_GL_CreateContext(win); // Make the context
+	gladLoadGLLoader((GLADloadproc)SDL_GL_GetProcAddress); //???
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE); // Only CORE PROFILE allowed in here
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3); // OpenGL 3
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3); // OpenGL 3.3
 	
 	// Vars for main loop
 	SDL_Event e;
@@ -84,7 +87,7 @@ int main()
 		// OpenGL tho :D
 		glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT); // I honestly have no idea what this does
-		SDL_GL_SwapWindow(win);
+		SDL_GL_SwapWindow(win); // VSYNC?
 	}
 
 	// Clean up
