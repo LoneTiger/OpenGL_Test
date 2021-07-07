@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <string>
+#include <glad.h>
 #include <SDL.h>
 #undef main
 
@@ -35,6 +36,7 @@ int main()
 	}
 
 	// Create renderer
+	/*
 	SDL_Renderer* ren = SDL_CreateRenderer(win, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
 	if (ren == nullptr) {
 		SDL_DestroyWindow(win);
@@ -45,6 +47,12 @@ int main()
 
 	// Load image to texture
 	SDL_Texture* tex = loadTexture("Trollface.bmp", ren);
+	*/
+	// no more render :(
+	// Time for OpenGL!! :D
+
+	SDL_GLContext context = SDL_GL_CreateContext(win);
+	gladLoadGLLoader((GLADloadproc)SDL_GL_GetProcAddress);
 	
 	// Vars for main loop
 	SDL_Event e;
@@ -67,14 +75,22 @@ int main()
 			//}
 		}
 		// Render
+		/*
 		SDL_RenderClear(ren);
 		renderTexture(tex, ren, 0, 0);
 		SDL_RenderPresent(ren);
+		*/
+		//...no more render
+		// OpenGL tho :D
+		glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+		glClear(GL_COLOR_BUFFER_BIT); // I honestly have no idea what this does
+		SDL_GL_SwapWindow(win);
 	}
 
 	// Clean up
-	SDL_DestroyTexture(tex);
-	SDL_DestroyRenderer(ren);
+	//SDL_DestroyTexture(tex);
+	//SDL_DestroyRenderer(ren);
+	SDL_GL_DeleteContext(context);
 	SDL_DestroyWindow(win);
 	SDL_Quit();
 
