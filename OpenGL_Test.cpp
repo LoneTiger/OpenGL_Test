@@ -27,7 +27,7 @@ int main()
 	}
 
 	// Create window
-	SDL_Window* win = SDL_CreateWindow("OpenGL_Test", 100, 100, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
+	SDL_Window* win = SDL_CreateWindow("OpenGL_Test", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN);
 	if (win == nullptr) {
 		logSDLError(cout, "Creating window");
 		SDL_Quit();
