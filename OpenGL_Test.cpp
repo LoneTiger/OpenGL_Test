@@ -19,9 +19,16 @@ int main()
 
 	// Triangle verticies
 	float verticies[] = {
-		-0.5f, -0.5f, 0.0f,
+		 0.5f,  0.5f, 0.0f,
 		 0.5f, -0.5f, 0.0f,
-		 0.0f,  0.5,  0.0f
+		-0.5f, -0.5f, 0.0f,
+		-0.5f,  0.5f, 0.0f
+	};
+
+	// Indices
+	unsigned int indices[] = {
+		0, 1, 3,
+		1, 2, 3
 	};
 
 	// Vertex shader (yeah I know this is cursed, it's temporary)
@@ -137,9 +144,18 @@ int main()
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
 	glEnableVertexAttribArray(0);
 
+	// EBO
+	unsigned int EBO;
+	glGenBuffers(1, &EBO);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+
 	// Delete shader objects now that the program has been set up
 	glDeleteShader(vertexShader);
 	glDeleteShader(fragmentShader);
+
+	// Temp wireframe rendering
+	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 	
 	// Vars for main loop
 	SDL_Event e;
@@ -169,7 +185,9 @@ int main()
 		// Draw triangle
 		glUseProgram(shaderProgram);
 		glBindVertexArray(VAO);
-		glDrawArrays(GL_TRIANGLES, 0, 3);
+		//glDrawArrays(GL_TRIANGLES, 0, 3);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 		SDL_GL_SwapWindow(win); // VSYNC?
 	}
 
