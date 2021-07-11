@@ -10,8 +10,6 @@
 using namespace std;
 
 void logSDLError(ostream& os, const string& msg);
-SDL_Texture* loadTexture(const string& file, SDL_Renderer* ren);
-void renderTexture(SDL_Texture* tex, SDL_Renderer* ren, int x, int y);
 
 int main()
 {
@@ -58,20 +56,6 @@ int main()
 		return 1;
 	}
 
-	// Create renderer
-	/*
-	SDL_Renderer* ren = SDL_CreateRenderer(win, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
-	if (ren == nullptr) {
-		SDL_DestroyWindow(win);
-		logSDLError(cout, "SDL_Render");
-		SDL_Quit();
-		return 1;
-	}
-
-	// Load image to texture
-	SDL_Texture* tex = loadTexture("Trollface.bmp", ren);
-	*/
-	// no more render :(
 	// Time for OpenGL!! :D
 
 	SDL_GLContext context = SDL_GL_CreateContext(win); // Make the context
@@ -177,14 +161,7 @@ int main()
 			//	quit = true;
 			//}
 		}
-		// Render
-		/*
-		SDL_RenderClear(ren);
-		renderTexture(tex, ren, 0, 0);
-		SDL_RenderPresent(ren);
-		*/
-		//...no more render
-		// OpenGL tho :D
+		// OpenGL :D
 
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f); // Red, Green, Blue, Alpha
 		glClear(GL_COLOR_BUFFER_BIT); // I honestly have no idea what this does
@@ -197,8 +174,6 @@ int main()
 	}
 
 	// Clean up
-	//SDL_DestroyTexture(tex);
-	//SDL_DestroyRenderer(ren);
 	SDL_GL_DeleteContext(context);
 	SDL_DestroyWindow(win);
 	SDL_Quit();
@@ -209,37 +184,4 @@ int main()
 // Error message logger/printer
 void logSDLError(ostream& os, const string& msg) {
 	os << msg << " error: " << SDL_GetError() << endl;
-}
-
-// Texture loading function
-// Takes path to image and renderer, returns pointer to texture
-SDL_Texture* loadTexture(const string& file, SDL_Renderer* ren) {
-	// Init as nullptr
-	SDL_Texture* texture = nullptr;
-	// Load image
-	SDL_Surface* loadedImage = SDL_LoadBMP(file.c_str());
-	// Make sure we didn't fail to load the image
-	if (loadedImage != nullptr) {
-		texture = SDL_CreateTextureFromSurface(ren, loadedImage);
-		SDL_FreeSurface(loadedImage);
-		//Make sure the texture was created
-		if (texture == nullptr) {
-			logSDLError(cout, "CreateTextureFromSurface");
-		}
-	}
-	else {
-		logSDLError(cout, "LoadBMP");
-	}
-	return texture;
-}
-
-// Texture renderer
-void renderTexture(SDL_Texture* tex, SDL_Renderer* ren, int x, int y) {
-	// Set destination rectangle position
-	SDL_Rect dst;
-	dst.x = x;
-	dst.y = y;
-	// Get width and height from texture
-	SDL_QueryTexture(tex, NULL, NULL, &dst.w, &dst.h);
-	SDL_RenderCopy(ren, tex, NULL, &dst);
 }
