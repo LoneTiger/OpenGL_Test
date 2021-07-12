@@ -19,16 +19,14 @@ int main()
 
 	// Triangle verticies
 	float verticies[] = {
-		 0.5f,  0.5f, 0.0f,
-		 0.5f, -0.5f, 0.0f,
 		-0.5f, -0.5f, 0.0f,
-		-0.5f,  0.5f, 0.0f
+		 0.0f,  0.5f, 0.0f,
+		 0.5f, -0.5f, 0.0f,
 	};
 
 	// Indices
 	unsigned int indices[] = {
-		0, 1, 3,
-		1, 2, 3
+		0, 1, 2
 	};
 
 	// Vertex shader (yeah I know this is cursed, it's temporary)
@@ -41,8 +39,9 @@ int main()
 	// Fragment shader
 	const char* fragmentShaderSource = "#version 330 core\n"
 		"out vec4 FragColor;\n"
+		"uniform vec4 ourColor;\n"
 		"void main() {\n"
-		"	FragColor = vec4(1.0f, 0.5f, 0.2, 1.0f);\n"
+		"	FragColor = ourColor;\n"
 		"}\n";
 
 
@@ -71,6 +70,11 @@ int main()
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3); // OpenGL 3
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3); // OpenGL 3.3
 	glViewport(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT); // Set OpenGL resolution/viewport thingy
+
+	// Print max number of vertex attributes
+	int nrAttributes;
+	glGetIntegerv(GL_MAX_VERTEX_ATTRIBS, &nrAttributes);
+	cout << "Mac number of vertex attributes: " << nrAttributes << endl;
 
 	// Create vertex shader object
 	unsigned int vertexShader;
@@ -155,7 +159,7 @@ int main()
 	glDeleteShader(fragmentShader);
 
 	// Temp wireframe rendering
-	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 	
 	// Vars for main loop
 	SDL_Event e;
@@ -182,12 +186,18 @@ int main()
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f); // Red, Green, Blue, Alpha
 		glClear(GL_COLOR_BUFFER_BIT); // I honestly have no idea what this does
 
+		// Update triangle color
+		float timeValue = SDL_GetTicks();
+		float greenValue = (sin(timeValue / 500) / 2.0f + 0.5f);
+		int vertexColorLocation = glGetUniformLocation(shaderProgram, "ourColor");
+
 		// Draw triangle
 		glUseProgram(shaderProgram);
+		glUniform4f(vertexColorLocation, 0.0f, greenValue, 0.0f, 1.0f);
 		glBindVertexArray(VAO);
 		//glDrawArrays(GL_TRIANGLES, 0, 3);
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+		glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, 0);
 		SDL_GL_SwapWindow(win); // VSYNC?
 	}
 
