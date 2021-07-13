@@ -135,6 +135,9 @@ int main()
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices2), indices2, GL_STATIC_DRAW);
 
 
+	ourShader.use();
+
+
 	// Temp wireframe rendering
 	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 	
@@ -164,13 +167,12 @@ int main()
 		glClear(GL_COLOR_BUFFER_BIT); // Clear the screen with above color
 
 		// Draw triangle
-		ourShader.use();
 		glBindVertexArray(VAO);
 		//glDrawArrays(GL_TRIANGLES, 0, 3);
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+		//glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 		glBindVertexArray(VAO2);
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO2);
+		//glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO2);
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 		SDL_GL_SwapWindow(win); // VSYNC?
 	}
