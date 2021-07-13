@@ -15,9 +15,9 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin)
 
 # Add source to this project's executable.
-add_executable (OpenGL_Test OpenGL_Test.cpp glad.c)
+add_executable (OpenGL_Test OpenGL_Test.cpp glad.c "shader.h" "shader.cpp")
 target_link_libraries(OpenGL_Test ${SDL2_LIBRARIES})
 
 
 # Copy resources to bin directory after building
-configure_file(${CMAKE_SOURCE_DIR}/Trollface.bmp ${CMAKE_SOURCE_DIR}/bin/Trollface.bmp COPYONLY)
+#configure_file(${CMAKE_SOURCE_DIR}/Trollface.bmp ${CMAKE_SOURCE_DIR}/bin/Trollface.bmp COPYONLY)
