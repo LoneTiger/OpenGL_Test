@@ -3,14 +3,14 @@
 
 #include <iostream>
 #include <string>
+#include <glad.h>
 #include <SDL.h>
+#include "shader.h"
 #undef main
 
 using namespace std;
 
 void logSDLError(ostream& os, const string& msg);
-SDL_Texture* loadTexture(const string& file, SDL_Renderer* ren);
-void renderTexture(SDL_Texture* tex, SDL_Renderer* ren, int x, int y);
 
 int main()
 {
@@ -18,33 +18,80 @@ int main()
 	const int SCREEN_WIDTH = 640;
 	const int SCREEN_HEIGHT = 480;
 
+	// Triangle verticies
+	float verticies[] = {
+		// Coordinates		// Colors
+		-0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f,
+		 0.0f,  0.5f, 0.0f, 0.0f, 1.0f, 0.0f,
+		 0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f
+	};
+
+	// Indices
+	unsigned int indices[] = {
+		0, 1, 2
+	};
+
 	cout << "Hello bruh" << endl;
 
 	// Initialize SDL2
 	if (SDL_Init(SDL_INIT_VIDEO) != 0) {
 		logSDLError(cout, "Video_init");
+		SDL_Quit();
 		return 1;
 	}
 
 	// Create window
-	SDL_Window* win = SDL_CreateWindow("OpenGL_Test", 100, 100, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
+	SDL_Window* win = SDL_CreateWindow("OpenGL_Test", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN);
 	if (win == nullptr) {
 		logSDLError(cout, "Creating window");
 		SDL_Quit();
 		return 1;
 	}
 
-	// Create renderer
-	SDL_Renderer* ren = SDL_CreateRenderer(win, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
-	if (ren == nullptr) {
-		SDL_DestroyWindow(win);
-		logSDLError(cout, "SDL_Render");
-		SDL_Quit();
-		return 1;
-	}
+	// Time for OpenGL!! :D
 
-	// Load image to texture
-	SDL_Texture* tex = loadTexture("Trollface.bmp", ren);
+	// Set everything up
+	SDL_GLContext context = SDL_GL_CreateContext(win); // Make the context
+	gladLoadGLLoader((GLADloadproc)SDL_GL_GetProcAddress); // GLAD
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE); // Only CORE PROFILE allowed in here
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3); // OpenGL 3
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3); // OpenGL 3.3
+	glViewport(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT); // Set OpenGL resolution/viewport thingy
+
+	// Print max number of vertex attributes (I'm curious)
+	int nrAttributes;
+	glGetIntegerv(GL_MAX_VERTEX_ATTRIBS, &nrAttributes);
+	cout << "Max number of vertex attributes: " << nrAttributes << endl;
+
+	// Create shader/program object
+	Shader ourShader("../shader.vsh", "../shader.fsh");
+
+	// VAO
+	unsigned int VAO;
+	glGenVertexArrays(1, &VAO);
+	glBindVertexArray(VAO);
+
+	// Vertex buffer object
+	unsigned int VBO; // Variable for buffer ID
+	glGenBuffers(1, &VBO); // Create the buffer
+	glBindBuffer(GL_ARRAY_BUFFER, VBO); // Bind the buffer as ARRAY_BUFFER
+	glBufferData(GL_ARRAY_BUFFER, sizeof(verticies), verticies, GL_STATIC_DRAW); // Load the vertex array to the buffer
+
+	// Vertex attributes
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
+	glEnableVertexAttribArray(0);
+	// Color attributes
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
+	glEnableVertexAttribArray(1);
+
+	// EBO
+	unsigned int EBO;
+	glGenBuffers(1, &EBO);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+
+	// Temp wireframe rendering
+	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 	
 	// Vars for main loop
 	SDL_Event e;
@@ -66,55 +113,29 @@ int main()
 			//	quit = true;
 			//}
 		}
-		// Render
-		SDL_RenderClear(ren);
-		renderTexture(tex, ren, 0, 0);
-		SDL_RenderPresent(ren);
+		// OpenGL :D
+
+		glClearColor(0.0f, 0.0f, 0.0f, 1.0f); // Red, Green, Blue, Alpha
+		glClear(GL_COLOR_BUFFER_BIT); // Clear the screen with above color
+
+		// Draw triangle
+		ourShader.use();
+		glBindVertexArray(VAO);
+		//glDrawArrays(GL_TRIANGLES, 0, 3);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+		glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, 0);
+		SDL_GL_SwapWindow(win); // VSYNC?
 	}
 
 	// Clean up
-	SDL_DestroyTexture(tex);
-	SDL_DestroyRenderer(ren);
+	SDL_GL_DeleteContext(context);
 	SDL_DestroyWindow(win);
 	SDL_Quit();
 
 	return 0;
 }
 
-// Error message logger/printer
+// SDL Error message logger/printer
 void logSDLError(ostream& os, const string& msg) {
 	os << msg << " error: " << SDL_GetError() << endl;
-}
-
-// Texture loading function
-// Takes path to image and renderer, returns pointer to texture
-SDL_Texture* loadTexture(const string& file, SDL_Renderer* ren) {
-	// Init as nullptr
-	SDL_Texture* texture = nullptr;
-	// Load image
-	SDL_Surface* loadedImage = SDL_LoadBMP(file.c_str());
-	// Make sure we didn't fail to load the image
-	if (loadedImage != nullptr) {
-		texture = SDL_CreateTextureFromSurface(ren, loadedImage);
-		SDL_FreeSurface(loadedImage);
-		//Make sure the texture was created
-		if (texture == nullptr) {
-			logSDLError(cout, "CreateTextureFromSurface");
-		}
-	}
-	else {
-		logSDLError(cout, "LoadBMP");
-	}
-	return texture;
-}
-
-// Texture renderer
-void renderTexture(SDL_Texture* tex, SDL_Renderer* ren, int x, int y) {
-	// Set destination rectangle position
-	SDL_Rect dst;
-	dst.x = x;
-	dst.y = y;
-	// Get width and height from texture
-	SDL_QueryTexture(tex, NULL, NULL, &dst.w, &dst.h);
-	SDL_RenderCopy(ren, tex, NULL, &dst);
 }
