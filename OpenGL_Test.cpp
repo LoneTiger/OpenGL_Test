@@ -20,15 +20,19 @@ int main()
 
 	// Triangle verticies
 	float verticies[] = {
-		// Coordinates		// Colors
-		-0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f,
-		 0.0f,  0.5f, 0.0f, 0.0f, 1.0f, 0.0f,
-		 0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f
+		// Coordinates			// Colors
+		-0.5f,  0.0f, 0.0f,		1.0f, 0.0f, 0.0f,
+		-0.25f,  0.5f, 0.0f,	0.0f, 1.0f, 0.0f,
+		 0.0f, -0.0f, 0.0f,		0.0f, 0.0f, 1.0f,
+
+		 0.0f, -0.5f, 0.0f,		1.0f, 0.0f, 0.0f,
+		 0.25f, 0.0f, 0.0f,		0.0f, 1.0f, 0.0f,
+		 0.5f, -0.5f, 0.0f,		0.0f, 0.0f, 1.0f
 	};
 
 	// Indices
 	unsigned int indices[] = {
-		0, 1, 2
+		0, 1, 2, 3, 4, 5
 	};
 
 	cout << "Hello bruh" << endl;
@@ -123,7 +127,7 @@ int main()
 		glBindVertexArray(VAO);
 		//glDrawArrays(GL_TRIANGLES, 0, 3);
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-		glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, 0);
+		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 		SDL_GL_SwapWindow(win); // VSYNC?
 	}
 
