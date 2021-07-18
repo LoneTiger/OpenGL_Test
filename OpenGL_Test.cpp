@@ -22,15 +22,15 @@ int main()
 	// Triangle verticies
 	float verticies[] = {
 		// Coordinates			// Colors			// Texture coordinates
-		-0.5f, -0.5f, 0.0f,		1.0f, 0.0f, 0.0f,	0.0f, 0.0f,
-		-0.5f,  0.5f, 0.0f,		0.0f, 1.0f, 0.0f,	0.0f, 1.0f,
-		 0.5f,  0.5f, 0.0f,		0.0f, 0.0f, 1.0f,	1.0f, 1.0f,
-		 0.5f, -0.5f, 0.0f,		0.0f, 1.0f, 0.0f,	1.0f, 0.0f
+		-0.5f, -0.5f, 0.0f,		1.0f, 0.0f, 0.0f,	-1.0f, -1.0f,
+		-0.5f,  0.5f, 0.0f,		0.0f, 1.0f, 0.0f,	-1.0f, 2.0f,
+		 0.5f,  0.5f, 0.0f,		0.0f, 0.0f, 1.0f,	2.0f, 2.0f,
+		 0.5f, -0.5f, 0.0f,		0.0f, 1.0f, 0.0f,	2.0f, -1.0f
 	};
 
 	// Indices
 	unsigned int indices[] = {
-		0, 1, 2, 0, 2, 3
+		0, 1, 3, 1, 2, 3
 	};
 
 	// Texture coordinates
@@ -116,7 +116,7 @@ int main()
 
 	// Set up missing texture color
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
 	glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, errColor);
 
 	// Set up linear scaling for minifying and NN for maximizing
@@ -125,7 +125,8 @@ int main()
 
 	// Texture load
 	int width, height, nrChannels;
-	unsigned char* data = stbi_load("../Trollface.png", &width, &height, &nrChannels, 0);
+	stbi_set_flip_vertically_on_load(true);
+	unsigned char* data = stbi_load("../texture1.png", &width, &height, &nrChannels, STBI_rgb);
 	// Failure check
 	if (data) {
 		// Continue if the texture loaded
