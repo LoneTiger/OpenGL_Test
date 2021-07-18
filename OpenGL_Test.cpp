@@ -5,6 +5,7 @@
 #include <string>
 #include <glad.h>
 #include <SDL.h>
+#include "stb_image.h"
 #include "shader.h"
 #undef main
 
@@ -20,34 +21,27 @@ int main()
 
 	// Triangle verticies
 	float verticies[] = {
-		// Coordinates			// Colors
-		-0.5f,  0.0f, 0.0f,		1.0f, 0.0f, 0.0f,
-		-0.25f,  0.5f, 0.0f,	0.0f, 1.0f, 0.0f,
-		 0.0f, -0.0f, 0.0f,		0.0f, 0.0f, 1.0f,
-
-		 0.0f, -0.5f, 0.0f,		1.0f, 0.0f, 0.0f,
-		 0.25f, 0.0f, 0.0f,		0.0f, 1.0f, 0.0f,
-		 0.5f, -0.5f, 0.0f,		0.0f, 0.0f, 1.0f
-	};
-
-	// Rectangle verticies
-	float verticies2[] = {
-		// Coordinates			// Colors
-		-0.75f, -0.75f, 0.0f,	0.0f, 0.0f, 1.0f,
-		-0.75f, -0.25f, 0.0f,	0.0f, 1.0f, 0.0f,
-		-0.25f, -0.25f, 0.0f,	1.0f, 0.0f, 0.0f,
-		-0.25f, -0.75f, 0.0f,	0.0f, 1.0f, 0.0f
+		// Coordinates			// Colors			// Texture coordinates
+		-0.5f, -0.5f, 0.0f,		1.0f, 0.0f, 0.0f,	0.0f, 0.0f,
+		-0.5f,  0.5f, 0.0f,		0.0f, 1.0f, 0.0f,	0.0f, 1.0f,
+		 0.5f,  0.5f, 0.0f,		0.0f, 0.0f, 1.0f,	1.0f, 1.0f,
+		 0.5f, -0.5f, 0.0f,		0.0f, 1.0f, 0.0f,	1.0f, 0.0f
 	};
 
 	// Indices
 	unsigned int indices[] = {
-		0, 1, 2, 3, 4, 5
+		0, 1, 2, 0, 2, 3
 	};
 
-	// Rectangle Indices
-	unsigned int indices2[] = {
-		0, 1, 2, 2, 3, 0
+	// Texture coordinates
+	float texCoords[] = {
+		0.0f, 0.0f,
+		0.5f, 1.0f,
+		1.0f, 0.0f
 	};
+	
+	// Missing texture color
+	float errColor[] = { 1.0f, 0.0f, 1.0f, 0.0f };
 
 	cout << "Hello bruh" << endl;
 
@@ -96,11 +90,14 @@ int main()
 	glBufferData(GL_ARRAY_BUFFER, sizeof(verticies), verticies, GL_STATIC_DRAW); // Load the vertex array to the buffer
 
 	// Vertex attributes
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
 	glEnableVertexAttribArray(0);
 	// Color attributes
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
 	glEnableVertexAttribArray(1);
+	// Texture attributes
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
+	glEnableVertexAttribArray(2);
 
 	// EBO
 	unsigned int EBO;
@@ -108,34 +105,39 @@ int main()
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
-	// Now all the same stuff for the rectangle
-
-	// VAO
-	unsigned int VAO2;
-	glGenVertexArrays(1, &VAO2);
-	glBindVertexArray(VAO2);
-
-	// Vertex buffer object
-	unsigned int VBO2;
-	glGenBuffers(1, &VBO2);
-	glBindBuffer(GL_ARRAY_BUFFER, VBO2);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(verticies2), verticies2, GL_STATIC_DRAW);
-
-	// Vertex attributes
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
-	glEnableVertexAttribArray(0);
-	// Color attributes
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
-	glEnableVertexAttribArray(1);
-
-	// EBO
-	unsigned int EBO2;
-	glGenBuffers(1, &EBO2);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO2);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices2), indices2, GL_STATIC_DRAW);
-
-
 	ourShader.use();
+
+	// Texture stuff
+	
+	// Texture generation
+	unsigned int texture;
+	glGenTextures(1, &texture);
+	glBindTexture(GL_TEXTURE_2D, texture);
+
+	// Set up missing texture color
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+	glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, errColor);
+
+	// Set up linear scaling for minifying and NN for maximizing
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+	// Texture load
+	int width, height, nrChannels;
+	unsigned char* data = stbi_load("../Trollface.png", &width, &height, &nrChannels, 0);
+	// Failure check
+	if (data) {
+		// Continue if the texture loaded
+		//			Texture type,  mipmap values,  w,	h,   legacy, source values, value type, actual texture
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+		glGenerateMipmap(GL_TEXTURE_2D);
+	}
+	else {
+		cout << "Failed to load texture!" << endl;
+	}
+
+	stbi_image_free(data);
 
 
 	// Temp wireframe rendering
@@ -167,12 +169,10 @@ int main()
 		glClear(GL_COLOR_BUFFER_BIT); // Clear the screen with above color
 
 		// Draw triangle
+		glBindTexture(GL_TEXTURE_2D, texture);
 		glBindVertexArray(VAO);
 		//glDrawArrays(GL_TRIANGLES, 0, 3);
 		//glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-		glBindVertexArray(VAO2);
-		//glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO2);
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 		SDL_GL_SwapWindow(win); // VSYNC?
 	}

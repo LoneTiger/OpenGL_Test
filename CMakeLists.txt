@@ -15,7 +15,7 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin)
 
 # Add source to this project's executable.
-add_executable (OpenGL_Test OpenGL_Test.cpp glad.c "shader.h" "shader.cpp")
+add_executable (OpenGL_Test OpenGL_Test.cpp glad.c "shader.h" "shader.cpp" "stb_image.cpp")
 target_link_libraries(OpenGL_Test ${SDL2_LIBRARIES})
 
 
