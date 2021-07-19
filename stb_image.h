@@ -370,6 +370,9 @@ RECENT REVISION HISTORY:
 
 #define STBI_VERSION 1
 
+// We're only using PNGs for now
+#define STBI_ONLY_PNG
+
 enum
 {
    STBI_default = 0, // only used for desired_channels

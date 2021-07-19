@@ -22,10 +22,10 @@ int main()
 	// Triangle verticies
 	float verticies[] = {
 		// Coordinates			// Colors			// Texture coordinates
-		-0.5f, -0.5f, 0.0f,		1.0f, 0.0f, 0.0f,	-1.0f, -1.0f,
-		-0.5f,  0.5f, 0.0f,		0.0f, 1.0f, 0.0f,	-1.0f, 2.0f,
-		 0.5f,  0.5f, 0.0f,		0.0f, 0.0f, 1.0f,	2.0f, 2.0f,
-		 0.5f, -0.5f, 0.0f,		0.0f, 1.0f, 0.0f,	2.0f, -1.0f
+		-0.5f, -0.5f, 0.0f,		1.0f, 0.0f, 0.0f,	0.0f, 0.0f,
+		-0.5f,  0.5f, 0.0f,		0.0f, 1.0f, 0.0f,	0.0f, 1.0f,
+		 0.5f,  0.5f, 0.0f,		0.0f, 0.0f, 1.0f,	1.0f, 1.0f,
+		 0.5f, -0.5f, 0.0f,		1.0f, 1.0f, 0.0f,	1.0f, 0.0f
 	};
 
 	// Indices
@@ -138,8 +138,40 @@ int main()
 		cout << "Failed to load texture!" << endl;
 	}
 
+	// Texture 2
+	unsigned int texture2;
+	glGenTextures(1, &texture2);
+	glBindTexture(GL_TEXTURE_2D, texture2);
+
+	// Set up missing texture color
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+	glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, errColor);
+
+	// Set up linear scaling for minifying and NN for maximizing
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+	// Texture load
+	int width2, height2, nrChannels2;
+	data = stbi_load("../trollface_transparent.png", &width, &height, &nrChannels, STBI_rgb_alpha);
+	// Failure check
+	if (data) {
+		// Continue if the texture loaded
+		//			Texture type,  mipmap values,  w,	h,   legacy, source values, value type, actual texture
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+		glGenerateMipmap(GL_TEXTURE_2D);
+	}
+	else {
+		cout << "Failed to load texture2!" << endl;
+	}
+
+
 	stbi_image_free(data);
 
+	// Set up texture units
+	glUniform1i(glGetUniformLocation(ourShader.ID, "texture"), 0);
+	ourShader.setInt("texture2", 1); // Secondary method
 
 	// Temp wireframe rendering
 	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
@@ -170,7 +202,10 @@ int main()
 		glClear(GL_COLOR_BUFFER_BIT); // Clear the screen with above color
 
 		// Draw triangle
+		glActiveTexture(GL_TEXTURE0); // First texture unit
 		glBindTexture(GL_TEXTURE_2D, texture);
+		glActiveTexture(GL_TEXTURE1); // Second texture unit
+		glBindTexture(GL_TEXTURE_2D, texture2);
 		glBindVertexArray(VAO);
 		//glDrawArrays(GL_TRIANGLES, 0, 3);
 		//glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
